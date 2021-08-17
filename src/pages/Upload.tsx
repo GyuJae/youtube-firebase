@@ -18,6 +18,7 @@ const Title = styled.h1`
   font-size: 27px;
   font-weight: 400;
   margin-bottom: 30px;
+  margin-left: 15px;
 `;
 
 const VideoContainer = styled.div``;
@@ -36,7 +37,6 @@ const FileButton = styled.button`
 
 const Upload = () => {
   const { visible, setVisible } = useVisible();
-
   return (
     <Container>
       <Content>

@@ -4,7 +4,7 @@ import { FaBars, FaCompass } from "react-icons/fa";
 import { FiClock } from "react-icons/fi";
 import { AiFillPlaySquare } from "react-icons/ai";
 import styled from "styled-components";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const SideContainer = styled.ul`
   display: flex;
@@ -25,10 +25,15 @@ const SideContainer = styled.ul`
   @media screen and (max-width: 600px) {
     display: none;
   }
+  z-index: 1001;
 `;
 
 const BarsContainer = styled.div`
   margin-bottom: 25px;
+`;
+
+const SLink = styled(Link)`
+  width: 100%;
 `;
 
 const SideIconContainer = styled.div<{ currentPath: boolean }>`
@@ -68,26 +73,36 @@ const Side = () => {
         <BarsContainer onClick={() => setSideShow(!sideShow)}>
           <BarsIcon />
         </BarsContainer>
-        <SideIconContainer currentPath={pathname === "/"}>
-          <HomeIcon />
-          <IconSpan>홈</IconSpan>
-        </SideIconContainer>
-        <SideIconContainer currentPath={pathname === "/search"}>
-          <CompassIcon />
-          <IconSpan>탐색</IconSpan>
-        </SideIconContainer>
-        <SideIconContainer currentPath={pathname === "/subscript"}>
-          <SubscriptionsIcon />
-          <IconSpan>구독</IconSpan>
-        </SideIconContainer>
-        <SideIconContainer currentPath={pathname === "/collection"}>
-          <AiFillPlaySquare />
-          <IconSpan>보관함</IconSpan>
-        </SideIconContainer>
-        <SideIconContainer currentPath={pathname === "/record"}>
-          <FiClock />
-          <IconSpan>시청 기록</IconSpan>
-        </SideIconContainer>
+        <SLink to="/">
+          <SideIconContainer currentPath={pathname === "/"}>
+            <HomeIcon />
+            <IconSpan>홈</IconSpan>
+          </SideIconContainer>
+        </SLink>
+        <SLink to="/search">
+          <SideIconContainer currentPath={pathname === "/search"}>
+            <CompassIcon />
+            <IconSpan>탐색</IconSpan>
+          </SideIconContainer>
+        </SLink>
+        <SLink to="/subscribe">
+          <SideIconContainer currentPath={pathname === "/subscribe"}>
+            <SubscriptionsIcon />
+            <IconSpan>구독</IconSpan>
+          </SideIconContainer>
+        </SLink>
+        <SLink to="/collections">
+          <SideIconContainer currentPath={pathname === "/collections"}>
+            <AiFillPlaySquare />
+            <IconSpan>보관함</IconSpan>
+          </SideIconContainer>
+        </SLink>
+        <SLink to="/record">
+          <SideIconContainer currentPath={pathname === "/record"}>
+            <FiClock />
+            <IconSpan>시청 기록</IconSpan>
+          </SideIconContainer>
+        </SLink>
       </SideContainer>
     </>
   );

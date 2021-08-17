@@ -1,17 +1,23 @@
 import React, { useCallback } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { BsExclamationSquareFill } from "react-icons/bs";
 import { MdFileUpload } from "react-icons/md";
 import { SubmitHandler, useForm } from "react-hook-form";
 import styled from "styled-components";
 import { useVisible } from "../contexts/UploadModal";
 import { useDropzone } from "react-dropzone";
+import { storageService } from "../fbase";
+import { useUser } from "../contexts/Auth";
+import { useState } from "react";
+import { useEffect } from "react";
+import SetVideoContent from "./SetVideoContent";
 
 interface IUploadModal {
   visible: boolean;
 }
 
 interface IForm {
-  file: File;
+  files: File[];
 }
 
 const Container = styled.div<{ visible: boolean }>`
@@ -141,15 +147,37 @@ const Input = styled.input`
 const UploadModal: React.FC<IUploadModal> = ({ visible }) => {
   const { register, handleSubmit } = useForm<IForm>();
 
-  const onSubmit: SubmitHandler<IForm> = (data) => console.log(data);
+  const user = useUser();
+
+  const [videoLink, setVideoLink] = useState<string | null>(null);
+  const [uploadVideo, setUploadVideo] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (videoLink) {
+      setUploadVideo(true);
+    }
+  }, [videoLink]);
+
+  const onSubmit: SubmitHandler<IForm> = async ({ files }) => {
+    const fileRef = storageService.ref().child(`${user?.uid}/${uuidv4()}`);
+    fileRef.put(files[0]).then(async (snapshot) => {
+      const link = await snapshot.ref.getDownloadURL();
+      setVideoLink(link);
+    });
+  };
 
   const { setVisible } = useVisible();
 
-  const onDrop = useCallback((acceptedFiles) => {
-    const formData = new FormData();
-    formData.append("file", acceptedFiles[0]);
-    console.log(acceptedFiles[0]);
-  }, []);
+  const onDrop = useCallback(
+    async (files) => {
+      const fileRef = storageService.ref().child(`${user?.uid}/${uuidv4()}`);
+      fileRef.put(files[0]).then(async (snapshot) => {
+        const link = await snapshot.ref.getDownloadURL();
+        setVideoLink(link);
+      });
+    },
+    [user?.uid]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -183,29 +211,32 @@ const UploadModal: React.FC<IUploadModal> = ({ visible }) => {
             </IconContainer>
           </TabBarRight>
         </TabBar>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <DropContainer {...RootProps}>
-            <DropLabel htmlFor="input-file">
-              <DropIconContainer isDragActive={isDragActive}>
-                <MdFileUpload />
-              </DropIconContainer>
-              <DropSpanCore>
-                동영상 파일을 드래그 앤 드롭하여 업로드
-              </DropSpanCore>
-              <DropSpanSub>
-                동영상을 게시하기 전에는 비공개로 설정됩니다.
-              </DropSpanSub>
-            </DropLabel>
-          </DropContainer>
-          <Label htmlFor="input-file">파일 선택</Label>
-          <Input
-            id="input-file"
-            type="file"
-            {...InputProps}
-            {...(register("file"), { required: true })}
-          />
-          {/* <Input type="submit" /> */}
-        </Form>
+        {uploadVideo && videoLink ? (
+          <SetVideoContent videoLink={videoLink} />
+        ) : (
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <DropContainer {...RootProps}>
+              <DropLabel htmlFor="input-file">
+                <DropIconContainer isDragActive={isDragActive}>
+                  <MdFileUpload />
+                </DropIconContainer>
+                <DropSpanCore>
+                  동영상 파일을 드래그 앤 드롭하여 업로드
+                </DropSpanCore>
+                <DropSpanSub>
+                  동영상을 게시하기 전에는 비공개로 설정됩니다.
+                </DropSpanSub>
+              </DropLabel>
+            </DropContainer>
+            <Label htmlFor="input-file">파일 선택</Label>
+            <Input
+              id="input-file"
+              type="file"
+              {...InputProps}
+              {...(register("files"), { required: true })}
+            />
+          </Form>
+        )}
       </InnerContent>
     </Container>
   );

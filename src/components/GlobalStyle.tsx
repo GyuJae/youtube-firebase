@@ -16,6 +16,14 @@ const GlobalStyle = createGlobalStyle`
         all: unset;
         border:none;
     }
+
+    main {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 75px;
+        left: 80px;
+    }
 `;
 
 export default GlobalStyle;

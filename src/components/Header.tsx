@@ -16,6 +16,7 @@ const NavContainer = styled.nav`
   width: 100%;
   background-color: ${(props) => props.theme.colors.white};
   box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  z-index: 1000;
 `;
 
 const ListContainer = styled.ul`
@@ -30,7 +31,7 @@ const LeftListContainer = styled.li`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: 90px;
+  margin-left: 80px;
   @media screen and (max-width: 600px) {
     margin-left: 0px;
   }
@@ -143,6 +144,7 @@ const MyChannalLink = styled(Link)`
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  width: 100%;
 `;
 
 const OptionIcon = styled.div`
@@ -152,7 +154,9 @@ const OptionIcon = styled.div`
   padding: 10px;
 `;
 
-const OptionSpan = styled.span``;
+const OptionSpan = styled.span`
+  color: ${(props) => props.theme.colors.black};
+`;
 
 const Header = () => {
   const user = useUser();
@@ -190,14 +194,14 @@ const Header = () => {
                   <MyName>{user.displayName}</MyName>
                 </MyInformation>
                 <ProfileOptions>
-                  <Option>
-                    <MyChannalLink to="/upload">
+                  <MyChannalLink to="/upload">
+                    <Option>
                       <OptionIcon>
                         <RiFileUserFill />
                       </OptionIcon>
                       <OptionSpan>내 채널</OptionSpan>
-                    </MyChannalLink>
-                  </Option>
+                    </Option>
+                  </MyChannalLink>
                   <Option onClick={logOut}>
                     <OptionIcon>
                       <BsBoxArrowInRight />
