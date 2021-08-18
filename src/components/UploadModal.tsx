@@ -11,6 +11,7 @@ import { useUser } from "../contexts/Auth";
 import { useState } from "react";
 import { useEffect } from "react";
 import SetVideoContent from "./SetVideoContent";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 interface IUploadModal {
   visible: boolean;
@@ -37,7 +38,7 @@ const Container = styled.div<{ visible: boolean }>`
   flex-wrap: wrap;
 `;
 
-const InnerContent = styled.main`
+const InnerContent = styled.div`
   position: fixed;
   display: flex;
   flex-direction: column;
@@ -92,7 +93,10 @@ const DropLabel = styled.label`
   flex-direction: column;
 `;
 
-const DropIconContainer = styled.div<{ isDragActive: boolean }>`
+const DropIconContainer = styled.div<{
+  isDragActive: boolean;
+  uploadLoading: boolean;
+}>`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -107,12 +111,26 @@ const DropIconContainer = styled.div<{ isDragActive: boolean }>`
   cursor: pointer;
   transition: all 0.5s ease-in;
   animation: rotate 1.5s linear
-    ${(props) => (props.isDragActive ? "infinite" : "none")};
+    ${(props) =>
+      props.isDragActive || props.uploadLoading ? "infinite" : "none"};
+
   @keyframes rotate {
     to {
       transform: rotate(360deg);
     }
   }
+`;
+
+const LoadingIconContainer = styled.div`
+  animation: rotate_image 1.3s linear infinite;
+  @keyframes rotate_image {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  width: 23px;
+  height: 23px;
+  color: ${(props) => props.theme.colors.white};
 `;
 
 const DropSpanCore = styled.span`
@@ -131,13 +149,19 @@ const Form = styled.form`
   align-items: center;
 `;
 
-const Label = styled.label`
+const Label = styled.label<{ uploadLoading: boolean }>`
   padding: 10px 13px;
   background-color: ${(props) => props.theme.colors.blue};
   border-radius: 4px;
   color: ${(props) => props.theme.colors.white};
   cursor: pointer;
   font-size: 15px;
+  width: 70px;
+  height: 23px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: ${(props) => props.uploadLoading && "none"};
 `;
 
 const Input = styled.input`
@@ -151,6 +175,7 @@ const UploadModal: React.FC<IUploadModal> = ({ visible }) => {
 
   const [videoLink, setVideoLink] = useState<string | null>(null);
   const [uploadVideo, setUploadVideo] = useState<boolean>(false);
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (videoLink) {
@@ -161,8 +186,10 @@ const UploadModal: React.FC<IUploadModal> = ({ visible }) => {
   const onSubmit: SubmitHandler<IForm> = async ({ files }) => {
     const fileRef = storageService.ref().child(`${user?.uid}/${uuidv4()}`);
     fileRef.put(files[0]).then(async (snapshot) => {
+      setUploadLoading(true);
       const link = await snapshot.ref.getDownloadURL();
       setVideoLink(link);
+      setUploadLoading(false);
     });
   };
 
@@ -170,11 +197,13 @@ const UploadModal: React.FC<IUploadModal> = ({ visible }) => {
 
   const onDrop = useCallback(
     async (files) => {
+      setUploadLoading(true);
       const fileRef = storageService.ref().child(`${user?.uid}/${uuidv4()}`);
       fileRef.put(files[0]).then(async (snapshot) => {
         const link = await snapshot.ref.getDownloadURL();
         setVideoLink(link);
       });
+      setUploadLoading(false);
     },
     [user?.uid]
   );
@@ -217,7 +246,10 @@ const UploadModal: React.FC<IUploadModal> = ({ visible }) => {
           <Form onSubmit={handleSubmit(onSubmit)}>
             <DropContainer {...RootProps}>
               <DropLabel htmlFor="input-file">
-                <DropIconContainer isDragActive={isDragActive}>
+                <DropIconContainer
+                  isDragActive={isDragActive}
+                  uploadLoading={uploadLoading}
+                >
                   <MdFileUpload />
                 </DropIconContainer>
                 <DropSpanCore>
@@ -228,7 +260,19 @@ const UploadModal: React.FC<IUploadModal> = ({ visible }) => {
                 </DropSpanSub>
               </DropLabel>
             </DropContainer>
-            <Label htmlFor="input-file">파일 선택</Label>
+            <Label htmlFor="input-file" uploadLoading={uploadLoading}>
+              {uploadLoading ? (
+                <LoadingIconContainer>
+                  <AiOutlineLoading3Quarters
+                    style={{
+                      fontSize: "23px",
+                    }}
+                  />
+                </LoadingIconContainer>
+              ) : (
+                "파일 선택"
+              )}
+            </Label>
             <Input
               id="input-file"
               type="file"

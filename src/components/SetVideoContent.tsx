@@ -6,6 +6,7 @@ import { VIDEOS } from "../contants";
 import { useUser } from "../contexts/Auth";
 import { dbService } from "../fbase";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { v4 as uuidv4 } from "uuid";
 
 interface ISetVideoContext {
   videoLink: string;
@@ -155,20 +156,23 @@ const SetVideoContent: React.FC<ISetVideoContext> = ({ videoLink }) => {
       dbService
         .collection(VIDEOS)
         .add({
-          userId: user?.uid,
+          id: uuidv4(),
           title,
           description: descriptionText,
           videoLink,
+          userId: user.uid,
+          userPhotoURL: user.photoURL,
+          username: user.displayName,
+          createAt: new Date(),
         })
         .then(() => {
-          setUploadLoading(false);
           history.go(0);
         })
         .catch((error) => {
-          setUploadLoading(false);
           setError(error);
         });
     }
+    setUploadLoading(false);
   };
   const [textCount, setTextConut] = useState<number>(0);
   const [titleActive, setTitleActive] = useState<boolean>(false);

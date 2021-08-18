@@ -77,7 +77,6 @@ const LoginContainer = styled.div`
   border: 1px solid;
   cursor: pointer;
   border-radius: 3px;
-  margin-right: 100px;
 `;
 
 const LogInButton = styled.button`
@@ -168,7 +167,7 @@ const Header = () => {
   };
   const logOut = async () => {
     authService.signOut();
-    history.push("/");
+    history.go(0);
   };
 
   return (
@@ -216,9 +215,9 @@ const Header = () => {
               />
             </ProfileContainer>
           ) : (
-            <LoginContainer>
+            <LoginContainer onClick={login}>
               <UserIcon />
-              <LogInButton onClick={login}>로그인</LogInButton>
+              <LogInButton>로그인</LogInButton>
             </LoginContainer>
           )}
         </RightContainer>

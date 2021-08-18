@@ -2,6 +2,7 @@ import React from "react";
 import { HashRouter, Switch, Route } from "react-router-dom";
 import { useUser } from "../contexts/Auth";
 import { Collections } from "../pages/Collections";
+import Detail from "../pages/Detail";
 import Home from "../pages/Home";
 import Profile from "../pages/Profile";
 import Record from "../pages/Record";
@@ -32,6 +33,9 @@ const AppRouter = () => {
         </Route>
         <Route path="/record">
           <Record />
+        </Route>
+        <Route path="/watch/:id">
+          <Detail />
         </Route>
         {user && (
           <>
