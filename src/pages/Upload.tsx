@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import UploadModal from "../components/UploadModal";
+import { VIDEOS } from "../contants";
+import { useUser } from "../contexts/Auth";
 import { useVisible } from "../contexts/UploadModal";
+import { dbService } from "../fbase";
 
 const Container = styled.div`
   margin-left: 90px;
@@ -21,9 +24,13 @@ const Title = styled.h1`
   margin-left: 15px;
 `;
 
-const VideoContainer = styled.div``;
+const VideoContainer = styled.div`
+  margin-top: 20px;
+`;
 
 const VideoList = styled.ul``;
+
+const VideoItem = styled.li``;
 
 const FileButton = styled.button`
   background-color: ${(props) => props.theme.colors.blue};
@@ -33,10 +40,29 @@ const FileButton = styled.button`
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.14px;
+  margin-left: 30px;
 `;
 
 const Upload = () => {
   const { visible, setVisible } = useVisible();
+  const user = useUser();
+  const [videos, setVideos] = useState<any[]>();
+  useEffect(() => {
+    dbService
+      .collection(VIDEOS)
+      .where("userId", "==", user?.uid)
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          setVideos((prev) => {
+            if (prev) {
+              return [...prev, doc.data()];
+            }
+            return [doc.data()];
+          });
+        });
+      });
+  }, [user?.uid]);
   return (
     <Container>
       <Content>
@@ -47,7 +73,11 @@ const Upload = () => {
           </FileButton>
         )}
         <VideoContainer>
-          <VideoList></VideoList>
+          <VideoList>
+            {videos?.map((video) => (
+              <VideoItem key={video.id}>{video.title}</VideoItem>
+            ))}
+          </VideoList>
         </VideoContainer>
         <UploadModal visible={visible} />
       </Content>
